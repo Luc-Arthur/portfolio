@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+[x-cloak] {
+    display: none !important;
+}
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    ::selection {
+        background: theme('colors.brass.DEFAULT');
+        color: theme('colors.ink.950');
+    }
+
+    :focus-visible {
+        outline: 2px solid theme('colors.brass.DEFAULT');
+        outline-offset: 3px;
+    }
+}
+
+@layer components {
+    /* Petit label technique en capitales espacées */
+    .label-mono {
+        @apply font-mono text-[0.7rem] uppercase tracking-label text-paper-faint;
+    }
+
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition duration-300;
+    }
+
+    .btn-primary {
+        @apply btn bg-brass text-ink-950 hover:bg-brass-light hover:-translate-y-0.5 hover:shadow-[0_10px_30px_-10px_rgba(227,164,58,0.6)];
+    }
+
+    .btn-ghost {
+        @apply btn border border-white/15 text-paper hover:border-brass hover:text-brass-light;
+    }
+
+    /* Lien souligné qui se dessine au survol */
+    .link-draw {
+        @apply relative;
+        background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0 1px;
+        transition: background-size 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .link-draw:hover,
+    .link-draw[aria-current='page'] {
+        background-size: 100% 1px;
+    }
+
+    .chip {
+        @apply inline-flex items-center rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 font-mono text-[0.7rem] text-paper-dim;
+    }
+
+    .field {
+        @apply mt-2 block w-full rounded-xl border-white/10 bg-ink-800/70 px-4 py-3 text-paper placeholder:text-paper-faint
+            focus:border-brass focus:ring-brass/40;
+    }
+}
+
+/* Grain photographique très léger sur tout le site */
+.grain::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Éléments animés par GSAP : masqués uniquement si le JS d'animation est actif */
+.js-motion [data-reveal],
+.js-motion [data-hero] {
+    opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    .animate-marquee,
+    .animate-scroll-hint {
+        animation: none;
+    }
+}
