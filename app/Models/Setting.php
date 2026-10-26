@@ -37,6 +37,19 @@ class Setting extends Model
         return $this->cv_path && Storage::disk('public')->exists($this->cv_path);
     }
 
+    /**
+     * Lien du CV : la route /cv sur le site Laravel, le fichier PDF dans la version statique.
+     */
+    public function cvUrl(): string
+    {
+        return config('portfolio.static') ? asset('cv/' . $this->cvFileName()) : route('cv');
+    }
+
+    public function cvFileName(): string
+    {
+        return \Illuminate\Support\Str::slug('CV ' . config('app.name')) . '.pdf';
+    }
+
     protected function twitterUrl(): Attribute
     {
         return Attribute::get(fn (?string $value) => self::withScheme($value));

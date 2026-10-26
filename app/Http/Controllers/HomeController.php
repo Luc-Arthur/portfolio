@@ -42,20 +42,17 @@ class HomeController extends Controller
     }
 
     /**
-     * Liste des projets, avec filtre par catégorie.
+     * Liste des projets. Le filtre par catégorie se fait dans le navigateur,
+     * pour fonctionner aussi dans la version statique (GitHub Pages).
      */
     public function projects(Request $request): View
     {
-        $categories = Category::orderBy('name')->get();
+        $projects = Project::with('category')->latest()->get();
+
+        // Seules les catégories qui contiennent des projets servent de filtre
+        $categories = Category::whereHas('projects')->orderBy('name')->get();
+
         $selectedCategory = $request->query('category');
-
-        $projectsQuery = Project::with('category')->latest();
-
-        if ($selectedCategory) {
-            $projectsQuery->where('category_id', $selectedCategory);
-        }
-
-        $projects = $projectsQuery->get();
 
         return view('projects', compact('projects', 'categories', 'selectedCategory'));
     }

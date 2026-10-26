@@ -19,7 +19,7 @@
 
                     <div data-hero class="mt-10 flex flex-wrap gap-3">
                         @if ($setting?->hasCv())
-                            <a href="{{ route('cv') }}" class="btn-primary">
+                            <a href="{{ $setting->cvUrl() }}" download class="btn-primary">
                                 Télécharger mon CV <x-icon name="download" />
                             </a>
                         @endif

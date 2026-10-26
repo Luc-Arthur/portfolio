@@ -145,3 +145,59 @@ test('le texte saisi dans l\'admin est mis en forme', function () {
         ->and($blocks[3]['text'])->toBe('Ce que je fais')
         ->and($blocks[4]['term'])->toBe('Front-end');
 });
+
+test('l\'export statique génère un site complet pour GitHub Pages', function () {
+    Illuminate\Support\Facades\Storage::fake('public');
+    $disk = Illuminate\Support\Facades\Storage::disk('public');
+
+    $image = imagecreatetruecolor(2400, 1500);
+    ob_start();
+    imagepng($image);
+    $disk->put('projects/capture.png', ob_get_clean());
+    $disk->put('cv/cv.pdf', '%PDF-1.4 test');
+
+    Setting::create(['cv_path' => 'cv/cv.pdf', 'email' => 'moi@example.com']);
+    makeProject(['image' => 'projects/capture.png']);
+
+    $output = 'storage/framework/testing/export';
+    $this->artisan('portfolio:export', ['--output' => $output, '--url' => 'https://exemple.github.io/portfolio'])
+        ->assertSuccessful();
+
+    $dir = base_path($output);
+
+    foreach (['index.html', 'projects/index.html', 'projects/mon-application/index.html', 'about/index.html',
+        'contact/index.html', '404.html', 'sitemap.xml', 'robots.txt', '.nojekyll', 'cv/cv-' . Str::slug(config('app.name')) . '.pdf',
+        'storage/projects/capture.jpg', 'build/manifest.json'] as $file) {
+        expect(file_exists("$dir/$file"))->toBeTrue("$file manquant");
+    }
+
+    $home = file_get_contents("$dir/index.html");
+    expect($home)
+        ->toContain('https://exemple.github.io/portfolio/projects/mon-application')
+        ->toContain('https://exemple.github.io/portfolio/storage/projects/capture.jpg')
+        ->not->toContain('capture.png')
+        ->not->toContain('localhost');
+
+    // L'image est réduite à 1600 px de large
+    expect(getimagesize("$dir/storage/projects/capture.jpg")[0])->toBe(1600);
+
+    // Sans Formspree, le formulaire de contact devient un lien e-mail
+    expect(file_get_contents("$dir/contact/index.html"))
+        ->toContain('mailto:moi@example.com')
+        ->not->toContain('_token');
+
+    Illuminate\Support\Facades\File::deleteDirectory($dir);
+});
+
+test('l\'export refuse d\'écraser un dossier qu\'il n\'a pas créé', function () {
+    $dir = base_path('storage/framework/testing/dossier-perso');
+    Illuminate\Support\Facades\File::ensureDirectoryExists($dir);
+    file_put_contents("$dir/important.txt", 'ne pas supprimer');
+
+    $this->artisan('portfolio:export', ['--output' => 'storage/framework/testing/dossier-perso'])
+        ->assertFailed();
+
+    expect(file_exists("$dir/important.txt"))->toBeTrue();
+
+    Illuminate\Support\Facades\File::deleteDirectory($dir);
+});

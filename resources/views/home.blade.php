@@ -65,7 +65,7 @@
                         Voir mes projets <x-icon name="arrow-right" />
                     </a>
                     @if ($setting?->hasCv())
-                        <a href="{{ route('cv') }}" class="btn-ghost">
+                        <a href="{{ $setting->cvUrl() }}" download class="btn-ghost">
                             Télécharger le CV <x-icon name="download" />
                         </a>
                     @else

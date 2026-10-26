@@ -3,6 +3,11 @@
 @section('title', 'Contact — ' . config('app.name'))
 @section('description', 'Contacter ' . config('app.name') . ' pour un projet web, une mission ou une opportunité.')
 
+@php
+    $isStatic = config('portfolio.static');
+    $formspreeId = config('portfolio.formspree_id');
+@endphp
+
 @section('content')
     <section class="mx-auto max-w-7xl px-5 pb-28 pt-40 sm:px-8 lg:px-12">
         <div class="grid grid-cols-1 gap-16 lg:grid-cols-12">
@@ -49,11 +54,23 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('contact.store') }}" class="space-y-6">
-                        @csrf
+                    @if ($isStatic && !$formspreeId)
+                        {{-- Version statique sans service de formulaire : contact direct par e-mail --}}
+                        <p class="font-serif text-3xl text-paper">Le plus simple : un e-mail.</p>
+                        <p class="mt-4 text-paper-dim">Présentez-vous en quelques lignes et dites-moi ce que vous avez en tête.</p>
+                        @if ($settings?->email)
+                            <a href="mailto:{{ $settings->email }}?subject={{ rawurlencode('Contact depuis le portfolio') }}" class="btn-primary mt-8">
+                                <x-icon name="mail" /> Écrire à {{ $settings->email }}
+                            </a>
+                        @endif
+                    @else
+                    <form method="POST" action="{{ $isStatic ? 'https://formspree.io/f/' . $formspreeId : route('contact.store') }}" class="space-y-6">
+                        @unless ($isStatic)
+                            @csrf
+                        @endunless
 
-                        {{-- Honeypot anti-spam --}}
-                        <input type="text" name="website" tabindex="-1" autocomplete="off" class="absolute -left-[9999px]" aria-hidden="true">
+                        {{-- Honeypot anti-spam (Formspree attend le nom « _gotcha ») --}}
+                        <input type="text" name="{{ $isStatic ? '_gotcha' : 'website' }}" tabindex="-1" autocomplete="off" class="absolute -left-[9999px]" aria-hidden="true">
 
                         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                             <div>
@@ -93,6 +110,7 @@
                             Envoyer le message <x-icon name="arrow-right" />
                         </button>
                     </form>
+                    @endif
                 </div>
             </div>
         </div>

@@ -57,7 +57,33 @@ Lance en parallèle le serveur PHP, la file d'attente, les logs (`pail`) et Vite
 php artisan test
 ```
 
-## Mise en ligne : checklist
+## Publier sur GitHub Pages (version statique)
+
+GitHub Pages n'exécute pas PHP : on y publie une copie statique du site, générée depuis ta version locale.
+
+```bash
+# 1. Ajouter ou modifier les projets dans l'admin en local (http://127.0.0.1:8000/admin)
+# 2. Compiler les assets et générer le site dans docs/
+npm run build
+php artisan portfolio:export
+# 3. Publier
+git add -A
+git commit -m "Mise à jour du site"
+git push
+```
+
+Le site est servi sur `STATIC_SITE_URL` (par défaut https://luc-arthur.github.io/portfolio/).
+Réglage à faire une seule fois sur GitHub : **Settings → Pages → Build and deployment → Deploy from a branch → `main` / `/docs`**.
+
+Dans la version statique :
+-   les images sont converties en JPEG allégés (1600 px de large maximum) ;
+-   le bouton CV pointe directement vers le PDF ;
+-   le formulaire de contact passe par [Formspree](https://formspree.io) si `FORMSPREE_ID` est renseigné, sinon il est remplacé par un bouton e-mail ;
+-   l'admin n'existe pas : tout se modifie en local, puis on régénère.
+
+Ne modifie pas `docs/` à la main : la commande efface et recrée ce dossier à chaque export.
+
+## Mise en ligne sur un hébergeur PHP : checklist
 
 -   [ ] Changer l'email et le mot de passe du compte admin (`/profile`)
 -   [ ] `.env` de production : `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://ton-domaine`

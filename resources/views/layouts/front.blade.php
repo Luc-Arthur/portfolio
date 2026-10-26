@@ -27,6 +27,7 @@
     <title>{{ $pageTitle }}</title>
     <meta name="description" content="{{ $pageDescription }}">
     <link rel="canonical" href="{{ url()->current() }}">
+    <link rel="icon" href="{{ asset('favicon.ico') }}">
 
     {{-- Aperçu lors d'un partage (LinkedIn, WhatsApp, X…) --}}
     <meta property="og:type" content="@yield('og_type', 'website')">
@@ -118,7 +119,7 @@
                     @endforeach
                     @if ($settings?->hasCv())
                         <li>
-                            <a href="{{ route('cv') }}"
+                            <a href="{{ $settings->cvUrl() }}" download
                                 class="btn-ghost !px-4 !py-2 text-xs">
                                 CV <x-icon name="download" class="h-3.5 w-3.5" />
                             </a>
@@ -149,7 +150,7 @@
                     @endforeach
                 </ul>
                 @if ($settings?->hasCv())
-                    <a href="{{ route('cv') }}"
+                    <a href="{{ $settings->cvUrl() }}" download
                         class="btn-primary mt-10">
                         Télécharger mon CV <x-icon name="download" />
                     </a>
