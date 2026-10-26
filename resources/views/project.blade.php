@@ -94,7 +94,9 @@
 
             <div data-reveal class="lg:col-span-8">
                 <p class="label-mono mb-4">À propos du projet</p>
-                <div class="whitespace-pre-line text-lg leading-relaxed text-paper-dim">{{ $project->description ?: 'Description à venir.' }}</div>
+                <x-rich-text :text="$project->description" lead>
+                    <p class="text-lg text-paper-dim">Description à venir.</p>
+                </x-rich-text>
             </div>
         </div>
 

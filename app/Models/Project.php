@@ -45,13 +45,15 @@ class Project extends Model
     }
 
     /**
-     * Technologies sous forme de liste (« Laravel, Vue » → ['Laravel', 'Vue']).
+     * Technologies sous forme de liste (« Laravel, Vue et MySQL » → ['Laravel', 'Vue', 'MySQL']).
      *
      * @return array<int, string>
      */
     public function techList(): array
     {
-        return array_values(array_filter(array_map('trim', explode(',', (string) $this->tech_stack))));
+        $items = preg_split('/\s*(?:,|;|\s\+\s|\set\s|\s&\s)\s*/u', (string) $this->tech_stack);
+
+        return array_values(array_filter(array_map('trim', $items)));
     }
 
     /**

@@ -117,3 +117,31 @@ test('si le fichier du CV a disparu, aucun lien cassé n\'est affiché', functio
     $this->get('/cv')->assertNotFound();
     $this->get('/')->assertDontSee(route('cv'));
 });
+
+test('les technologies sont découpées sur les virgules et « et »', function () {
+    $project = new Project(['tech_stack' => 'HTML, CSS et JavaScript natif']);
+
+    expect($project->techList())->toBe(['HTML', 'CSS', 'JavaScript natif']);
+});
+
+test('le texte saisi dans l\'admin est mis en forme', function () {
+    $blocks = App\Support\RichText::parse(<<<'TXT'
+        Fluxo est une landing page pour un SaaS financier.
+
+        Un parcours pensé pour convertir
+        La page suit une progression claire.
+
+        💻 Ce que je fais
+        Front-end : interfaces réactives.
+
+        Mon approche repose sur :
+        La qualité du code.
+        L'expérience utilisateur.
+        TXT);
+
+    expect(array_column($blocks, 'type'))
+        ->toBe(['text', 'heading', 'text', 'heading', 'term', 'text', 'item', 'item'])
+        ->and($blocks[1]['text'])->toBe('Un parcours pensé pour convertir')
+        ->and($blocks[3]['text'])->toBe('Ce que je fais')
+        ->and($blocks[4]['term'])->toBe('Front-end');
+});

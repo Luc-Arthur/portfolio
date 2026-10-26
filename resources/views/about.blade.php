@@ -2,34 +2,6 @@
 
 @section('title', 'À propos — ' . config('app.name'))
 
-@php
-    // Mise en forme de la bio saisie dans l'admin :
-    // - ligne courte commençant par un emoji (« 💻 Ce que je fais ») → intertitre
-    // - « Libellé : texte » → ligne mise en valeur
-    // - lignes courtes après une phrase finissant par « : » → liste à puces
-    // - le reste → paragraphe
-    $inList = false;
-    $blocks = collect(preg_split('/\R/u', $setting?->about_description ?? ''))
-        ->map(fn ($line) => trim($line))
-        ->filter()
-        ->map(function ($line) use (&$inList) {
-            if (mb_strlen($line) < 60 && preg_match('/^[^\p{L}\p{N}]+\s*(.+)$/u', $line, $m)) {
-                $inList = false;
-                return ['type' => 'heading', 'text' => $m[1]];
-            }
-            if ($inList && mb_strlen($line) < 90) {
-                return ['type' => 'item', 'text' => $line];
-            }
-            $inList = str_ends_with($line, ':');
-
-            if (preg_match('/^(.{2,30}?)\s:\s(.+)$/u', $line, $m)) {
-                return ['type' => 'term', 'term' => $m[1], 'text' => $m[2]];
-            }
-            return ['type' => 'text', 'text' => $line];
-        })
-        ->values();
-@endphp
-
 @section('content')
     <section class="mx-auto max-w-7xl px-5 pb-20 pt-40 sm:px-8 lg:px-12">
         <div class="grid grid-cols-1 gap-16 lg:grid-cols-12">
@@ -62,29 +34,9 @@
                     {{ mb_convert_case($setting?->about_title ?: 'À propos', MB_CASE_TITLE) }}<span class="text-brass">.</span>
                 </h1>
 
-                <div data-hero class="mt-12 space-y-6">
-                    @forelse ($blocks as $block)
-                        @if ($block['type'] === 'heading')
-                            <h2 class="!mt-14 flex items-center gap-4 font-serif text-3xl text-paper first:!mt-0">
-                                <span class="h-px w-8 bg-brass"></span>{{ $block['text'] }}
-                            </h2>
-                        @elseif ($block['type'] === 'item')
-                            <p class="flex items-start gap-3 text-paper">
-                                <span class="mt-2.5 h-1.5 w-1.5 shrink-0 rotate-45 bg-brass"></span>{{ $block['text'] }}
-                            </p>
-                        @elseif ($block['type'] === 'term')
-                            <p class="border-l border-white/10 pl-5 leading-relaxed text-paper-dim">
-                                <span class="font-semibold text-paper">{{ $block['term'] }}</span> — {{ $block['text'] }}
-                            </p>
-                        @else
-                            <p class="text-lg leading-relaxed text-paper-dim {{ $loop->first ? '!text-xl !text-paper' : '' }}">
-                                {{ $block['text'] }}
-                            </p>
-                        @endif
-                    @empty
-                        <p class="text-lg text-paper-dim">Personnalise cette bio depuis l'espace d'administration.</p>
-                    @endforelse
-                </div>
+                <x-rich-text data-hero class="mt-12" :text="$setting?->about_description" lead>
+                    <p class="text-lg text-paper-dim">Personnalise cette bio depuis l'espace d'administration.</p>
+                </x-rich-text>
             </div>
         </div>
     </section>
